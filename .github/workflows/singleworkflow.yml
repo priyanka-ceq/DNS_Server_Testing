@@ -130,7 +130,7 @@ jobs:
 
           azPSVersion: "5.0.0"
 
-      - name: DNS Server Addition to VM
+      - name: DNS Server Addition to VNet
         uses: azure/powershell@v1
         with:
           inlineScript: |
