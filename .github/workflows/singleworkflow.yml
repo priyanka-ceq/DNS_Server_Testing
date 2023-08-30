@@ -36,10 +36,10 @@ on:
         default: "10.0.0.1"
 
 env:
-  RgName : ${{github.event.inputs.resource_group_name}}
-  VmName : ${{github.event.inputs.virtual_machine_name}}
-  VNetName : ${{github.event.inputs.virtual_network_name}}
-  DNSServers : ${{github.event.inputs.dns_servers_ip}}
+  RgName : ${{ github.event.inputs.resource_group_name }}
+  VmName : ${{ github.event.inputs.virtual_machine_name }}
+  VNetName : ${{ github.event.inputs.virtual_network_name }}
+  DNSServers : ${{ github.event.inputs.dns_servers_ip }}
 
 jobs:
   DNS_Server:
@@ -54,23 +54,23 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: "Setting Environment"
-        env:
-          DEV: ${{ contains(github.event.inputs.infra_env, 'dev') }}
-        run: |
-          if ${DEV} == true; then
-            echo "ARM_CLIENT_ID=${{secrets.CEQ_AZURE_SANDBOX_TF_ARM_CLIENT_ID}}" >> $GITHUB_ENV
-            echo "ARM_CLIENT_SECRET=${{secrets.CEQ_AZURE_SANDBOX_TF_ARM_CLIENT_SECRET}}" >> $GITHUB_ENV
-            echo "ARM_SUBSCRIPTION_ID=${{secrets.CEQ_AZURE_SANDBOX_TF_ARM_SUBS_ID}}" >> $GITHUB_ENV
-            echo "ARM_TENANT_ID=${{secrets.CEQ_AZURE_SANDBOX_TF_ARM_TENANT_ID}}" >> $GITHUB_ENV
-            echo "TFSTATE_RG=cloudeq" >> $GITHUB_ENV
-            echo "TFSTATE_STORAGE_ACCOUNT=ceqstoragecd02" >> $GITHUB_ENV
-            echo "TFSTATE_CONTAINER=tfstate" >> $GITHUB_ENV
-            echo "ENV=dev" >> $GITHUB_ENV
-          else
-            echo "environment not supported"
-            exit 1
-          fi
+      # - name: "Setting Environment"
+      #   env:
+      #     DEV: ${{ contains(github.event.inputs.infra_env, 'dev') }}
+      #   run: |
+      #     if ${DEV} == true; then
+      #       echo "ARM_CLIENT_ID=${{secrets.CEQ_AZURE_SANDBOX_TF_ARM_CLIENT_ID}}" >> $GITHUB_ENV
+      #       echo "ARM_CLIENT_SECRET=${{secrets.CEQ_AZURE_SANDBOX_TF_ARM_CLIENT_SECRET}}" >> $GITHUB_ENV
+      #       echo "ARM_SUBSCRIPTION_ID=${{secrets.CEQ_AZURE_SANDBOX_TF_ARM_SUBS_ID}}" >> $GITHUB_ENV
+      #       echo "ARM_TENANT_ID=${{secrets.CEQ_AZURE_SANDBOX_TF_ARM_TENANT_ID}}" >> $GITHUB_ENV
+      #       echo "TFSTATE_RG=cloudeq" >> $GITHUB_ENV
+      #       echo "TFSTATE_STORAGE_ACCOUNT=ceqstoragecd02" >> $GITHUB_ENV
+      #       echo "TFSTATE_CONTAINER=tfstate" >> $GITHUB_ENV
+      #       echo "ENV=dev" >> $GITHUB_ENV
+      #     else
+      #       echo "environment not supported"
+      #       exit 1
+      #     fi
 
       - name: Plan Review Step
         uses: azure/powershell@v1
@@ -85,8 +85,8 @@ jobs:
     runs-on: ubuntu-latest
     needs: ["DNS_Server"]
 
-    environment:
-      name: Deployment_Review
+    # environment:
+    #   name: Deployment_Review
 
     defaults:
       run:
@@ -96,77 +96,77 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: "Setting Environment"
-        env:
-          DEV: ${{ contains(github.event.inputs.infra_env, 'dev') }}
-        run: |
-          if ${DEV} == true; then
-            echo "ARM_CLIENT_ID=${{secrets.CEQ_AZURE_SANDBOX_TF_ARM_CLIENT_ID}}" >> $GITHUB_ENV
-            echo "ARM_CLIENT_SECRET=${{secrets.CEQ_AZURE_SANDBOX_TF_ARM_CLIENT_SECRET}}" >> $GITHUB_ENV
-            echo "ARM_SUBSCRIPTION_ID=${{secrets.CEQ_AZURE_SANDBOX_TF_ARM_SUBS_ID}}" >> $GITHUB_ENV
-            echo "ARM_TENANT_ID=${{secrets.CEQ_AZURE_SANDBOX_TF_ARM_TENANT_ID}}" >> $GITHUB_ENV
-            echo "TFSTATE_RG=cloudeq" >> $GITHUB_ENV
-            echo "TFSTATE_STORAGE_ACCOUNT=ceqstoragecd02" >> $GITHUB_ENV
-            echo "TFSTATE_CONTAINER=tfstate" >> $GITHUB_ENV
-            echo "ENV=dev" >> $GITHUB_ENV
-          else
-            echo "environment not supported"
-            exit 1
-          fi
+      # - name: "Setting Environment"
+      #   env:
+      #     DEV: ${{ contains(github.event.inputs.infra_env, 'dev') }}
+      #   run: |
+      #     if ${DEV} == true; then
+      #       echo "ARM_CLIENT_ID=${{secrets.CEQ_AZURE_SANDBOX_TF_ARM_CLIENT_ID}}" >> $GITHUB_ENV
+      #       echo "ARM_CLIENT_SECRET=${{secrets.CEQ_AZURE_SANDBOX_TF_ARM_CLIENT_SECRET}}" >> $GITHUB_ENV
+      #       echo "ARM_SUBSCRIPTION_ID=${{secrets.CEQ_AZURE_SANDBOX_TF_ARM_SUBS_ID}}" >> $GITHUB_ENV
+      #       echo "ARM_TENANT_ID=${{secrets.CEQ_AZURE_SANDBOX_TF_ARM_TENANT_ID}}" >> $GITHUB_ENV
+      #       echo "TFSTATE_RG=cloudeq" >> $GITHUB_ENV
+      #       echo "TFSTATE_STORAGE_ACCOUNT=ceqstoragecd02" >> $GITHUB_ENV
+      #       echo "TFSTATE_CONTAINER=tfstate" >> $GITHUB_ENV
+      #       echo "ENV=dev" >> $GITHUB_ENV
+      #     else
+      #       echo "environment not supported"
+      #       exit 1
+      #     fi
 
       # Checkout the repository to the GitHub Actions runner
-      - name: Login to azure
-        uses: azure/login@v1
-        with:
-          creds: '{"clientId":"${{ env.ARM_CLIENT_ID }}","clientSecret":"${{ env.ARM_CLIENT_SECRET }}","subscriptionId":"${{ env.ARM_SUBSCRIPTION_ID }}","tenantId":"${{ env.ARM_TENANT_ID }}"}'
-          enable-AzPSSession: true
+      # - name: Login to azure
+      #   uses: azure/login@v1
+      #   with:
+      #     creds: '{"clientId":"${{ env.ARM_CLIENT_ID }}","clientSecret":"${{ env.ARM_CLIENT_SECRET }}","subscriptionId":"${{ env.ARM_SUBSCRIPTION_ID }}","tenantId":"${{ env.ARM_TENANT_ID }}"}'
+      #     enable-AzPSSession: true
 
-      - name: Download Azure Dependencies Modules
-        uses: azure/powershell@v1
-        with:
-          inlineScript: |
-            Install-Module -Name Az.Compute -Force -AllowClobber
-            Install-Module -Name Az.Storage -Force -AllowClobber
-            Install-Module -Name Az.Network -Force -AllowClobber 
-            Install-Module -Name Az.Resources -Force -AllowClobber
-          azPSVersion: "5.0.0"
+      # - name: Download Azure Dependencies Modules
+      #   uses: azure/powershell@v1
+      #   with:
+      #     inlineScript: |
+      #       Install-Module -Name Az.Compute -Force -AllowClobber
+      #       Install-Module -Name Az.Storage -Force -AllowClobber
+      #       Install-Module -Name Az.Network -Force -AllowClobber 
+      #       Install-Module -Name Az.Resources -Force -AllowClobber
+      #     azPSVersion: "5.0.0"
 
-      - name: DNS Server Addition to VM
-        uses: azure/powershell@v1
-        with:
-          inlineScript: |
-            # . .\${{env.ENV}}\Post-Provisioning-variables.ps1
-            Write-output "$RgName"
-            Write-output "$VmName"
-            Write-output "$DNSServers"
-            try {
-              $vm = Get-AzVM -ResourceGroupName $RgName -Name $VmName
-              $nicID = $vm.NetworkProfile.NetworkInterfaces[0].Id
-              $nic = Get-AzNetworkInterface -ResourceId $nicID
-              $nic.DnsSettings.DnsServers = $DNSServers
-              $nic | Set-AzNetworkInterface
-              $nic.DnsSettings.DnsServers
-            } catch {
-              Write-Host "An error occurred: $($_.Exception.Message)"
-            }
+      # - name: DNS Server Addition to VM
+      #   uses: azure/powershell@v1
+      #   with:
+      #     inlineScript: |
+      #       # . .\${{env.ENV}}\Post-Provisioning-variables.ps1
+      #       Write-output "$RgName"
+      #       Write-output "$VmName"
+      #       Write-output "$DNSServers"
+      #       try {
+      #         $vm = Get-AzVM -ResourceGroupName $RgName -Name $VmName
+      #         $nicID = $vm.NetworkProfile.NetworkInterfaces[0].Id
+      #         $nic = Get-AzNetworkInterface -ResourceId $nicID
+      #         $nic.DnsSettings.DnsServers = $DNSServers
+      #         $nic | Set-AzNetworkInterface
+      #         $nic.DnsSettings.DnsServers
+      #       } catch {
+      #         Write-Host "An error occurred: $($_.Exception.Message)"
+      #       }
 
-          azPSVersion: "5.0.0"
+      #     azPSVersion: "5.0.0"
 
-      - name: DNS Server Addition to VNet
-        uses: azure/powershell@v1
-        with:
-          inlineScript: |
-            # . .\${{env.ENV}}\Post-Provisioning-variables.ps1
-            Write-output "$RgName"
-            Write-output "$VNetName"
-            Write-output "$DNSServers"
-            try {
-              $vnet = Get-AzVirtualNetwork -ResourceGroupName $RgName -Name $VNetName
-              $vnet.DhcpOptions.DnsServers = $DNSServers
-              $vnet | Set-AzVirtualNetwork
-              $vnet.DhcpOptions.DnsServers
-            } catch {
-              Write-Host "An error occurred: $($_.Exception.Message)"
-            }
+      # - name: DNS Server Addition to VNet
+      #   uses: azure/powershell@v1
+      #   with:
+      #     inlineScript: |
+      #       # . .\${{env.ENV}}\Post-Provisioning-variables.ps1
+      #       Write-output "$RgName"
+      #       Write-output "$VNetName"
+      #       Write-output "$DNSServers"
+      #       try {
+      #         $vnet = Get-AzVirtualNetwork -ResourceGroupName $RgName -Name $VNetName
+      #         $vnet.DhcpOptions.DnsServers = $DNSServers
+      #         $vnet | Set-AzVirtualNetwork
+      #         $vnet.DhcpOptions.DnsServers
+      #       } catch {
+      #         Write-Host "An error occurred: $($_.Exception.Message)"
+      #       }
 
-          azPSVersion: "5.0.0"
+      #     azPSVersion: "5.0.0"
