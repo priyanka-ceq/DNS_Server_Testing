@@ -77,7 +77,7 @@ jobs:
         with:
           inlineScript: |
             # . .\${{env.ENV}}\Post-Provisioning-variables.ps1
-            Write-Host "DNS Server $DNSServers is being added to this $VmName and $VNetNam' in this $RgName."
+            Write-Host 'DNS Server "$DNSServers" is being added to this "$VmName" and "$VNetName" in this "$RgName".'
           azPSVersion: "5.0.0"
 
   DNS_Server_Addition:
