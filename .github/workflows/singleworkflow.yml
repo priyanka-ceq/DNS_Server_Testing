@@ -69,6 +69,8 @@ jobs:
           VMorVNetName: ${{ github.event.inputs.vm_or_vnet_name }}
         run: |
           if ${VM} == true; then
+            echo $VM
+            echo $VNet
             echo "DNS Server $DNSServers is being added to the virtual machine $VMorVNetName in the resource group $RgName."
           else
             echo "DNS Server $DNSServers is being added to the virtual network $VMorVNetName in the resource group $RgName."
