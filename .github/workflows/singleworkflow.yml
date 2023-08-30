@@ -1,14 +1,3 @@
-# singleworkflow
-# SANDBOX:
-# McDonalds Corp - Sandbox (Infosys)
-# 1ff52360-ccb7-42c0-8a63-e4424d746eac
-# NONPROD:
-# MCD-CORP-NONPROD-01
-# 2b8dbbd2-999e-49f3-bb5e-f307d7658ac6
-# PROD:
-# MCD-CORP-PROD-01
-# 345395af-dab3-4547-9ebb-bbb00ceffcac
-
 name: "DNS_Servers"
 
 on:
@@ -17,7 +6,28 @@ on:
       infra_env:
         description: "Environment Name"
         required: true
-        default: "provide one (dev/sandbox/nonprod/prod)"
+        type: choice
+        options:
+        - dev
+        - sandbox
+        - nonprod
+        - prod
+      resource_group_name:
+        description: "Resource Group Name"
+        required: true
+      vm_or_vnet_choice:
+        description: "Add DNS Server to Virtual Machine or Virtual Network"
+        required: true
+        type: choice
+        options:
+        - Virtual Machine
+        - Virtual Network
+      vm_or_vnet_name:
+        description: "Type Virtual Machine or Virtual Network Name"
+        required: true
+      dns_servers_ip:
+        description: "DNS Servers"
+        required: true
 
 jobs:
   DNS_Server:
@@ -51,12 +61,18 @@ jobs:
           fi
 
       - name: Plan Review Step
-        uses: azure/powershell@v1
-        with:
-          inlineScript: |
-            . .\${{env.ENV}}\Post-Provisioning-variables.ps1
-            Write-Host "DNS Server '$DNSServers' is being added to this '$VmName' and '$VNetName' in this '$RgName'."
-          azPSVersion: "5.0.0"
+        env:
+          VM: ${{ contains(github.event.inputs.vm_or_vnet_choice, 'Virtual Machine') }}
+          VNet: ${{ contains(github.event.inputs.vm_or_vnet_choice, 'Virtual Network') }}
+          RgName: ${{ github.event.inputs.resource_group_name }}
+          DNSServers: ${{ github.event.inputs.dns_servers_ip }}
+          VMorVNetName: ${{ github.event.inputs.vm_or_vnet_name }}
+        run: |
+          if ${VM} == true; then
+            echo "DNS Server $DNSServers is being added to the virtual machine $VMorVNetName in the resource group $RgName."
+          else
+            echo "DNS Server $DNSServers is being added to the virtual network $VMorVNetName in the resource group $RgName."
+          fi
 
   DNS_Server_Addition:
     name: "DNS_Server_Addition"
@@ -107,42 +123,36 @@ jobs:
             Install-Module -Name Az.Storage -Force -AllowClobber
             Install-Module -Name Az.Network -Force -AllowClobber 
             Install-Module -Name Az.Resources -Force -AllowClobber
+          
           azPSVersion: "5.0.0"
 
       - name: DNS Server Addition to VM
         uses: azure/powershell@v1
+        env:
+          VM: ${{ contains(github.event.inputs.vm_or_vnet_choice, 'Virtual Machine') }}
+          VNet: ${{ contains(github.event.inputs.vm_or_vnet_choice, 'Virtual Network') }}
+          RgName: ${{ github.event.inputs.resource_group_name }}
+          DNSServers: ${{ github.event.inputs.dns_servers_ip }}
+          VMorVNetName: ${{ github.event.inputs.vm_or_vnet_name }}
         with:
           inlineScript: |
-            . .\${{env.ENV}}\Post-Provisioning-variables.ps1
             Write-output "$RgName"
-            Write-output "$VmName"
+            Write-output "$VMorVNetName"
             Write-output "$DNSServers"
             try {
-              $vm = Get-AzVM -ResourceGroupName $RgName -Name $VmName
-              $nicID = $vm.NetworkProfile.NetworkInterfaces[0].Id
-              $nic = Get-AzNetworkInterface -ResourceId $nicID
-              $nic.DnsSettings.DnsServers = $DNSServers
-              $nic | Set-AzNetworkInterface
-              $nic.DnsSettings.DnsServers
-            } catch {
-              Write-Host "An error occurred: $($_.Exception.Message)"
-            }
-
-          azPSVersion: "5.0.0"
-
-      - name: DNS Server Addition to VNet
-        uses: azure/powershell@v1
-        with:
-          inlineScript: |
-            . .\${{env.ENV}}\Post-Provisioning-variables.ps1
-            Write-output "$RgName"
-            Write-output "$VNetName"
-            Write-output "$DNSServers"
-            try {
-              $vnet = Get-AzVirtualNetwork -ResourceGroupName $RgName -Name $VNetName
-              $vnet.DhcpOptions.DnsServers = $DNSServers
-              $vnet | Set-AzVirtualNetwork
-              $vnet.DhcpOptions.DnsServers
+              if(${VM} -eq $true){  
+                $vm = Get-AzVM -ResourceGroupName $RgName -Name $VMorVNetName
+                $nicID = $vm.NetworkProfile.NetworkInterfaces[0].Id
+                $nic = Get-AzNetworkInterface -ResourceId $nicID
+                $nic.DnsSettings.DnsServers = $DNSServers
+                $nic | Set-AzNetworkInterface
+                $nic.DnsSettings.DnsServers
+              } else {
+                $vnet = Get-AzVirtualNetwork -ResourceGroupName $RgName -Name $VMorVNetName
+                $vnet.DhcpOptions.DnsServers = $DNSServers
+                $vnet | Set-AzVirtualNetwork
+                $vnet.DhcpOptions.DnsServers
+              }
             } catch {
               Write-Host "An error occurred: $($_.Exception.Message)"
             }
