@@ -92,41 +92,41 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: "Setting Environment"
-        env:
-          DEV: ${{ contains(github.event.inputs.infra_env, 'dev') }}
-        run: |
-          if ${DEV} == true; then
-            echo "ARM_CLIENT_ID=${{secrets.CEQ_AZURE_SANDBOX_TF_ARM_CLIENT_ID}}" >> $GITHUB_ENV
-            echo "ARM_CLIENT_SECRET=${{secrets.CEQ_AZURE_SANDBOX_TF_ARM_CLIENT_SECRET}}" >> $GITHUB_ENV
-            echo "ARM_SUBSCRIPTION_ID=${{secrets.CEQ_AZURE_SANDBOX_TF_ARM_SUBS_ID}}" >> $GITHUB_ENV
-            echo "ARM_TENANT_ID=${{secrets.CEQ_AZURE_SANDBOX_TF_ARM_TENANT_ID}}" >> $GITHUB_ENV
-            echo "TFSTATE_RG=cloudeq" >> $GITHUB_ENV
-            echo "TFSTATE_STORAGE_ACCOUNT=ceqstoragecd02" >> $GITHUB_ENV
-            echo "TFSTATE_CONTAINER=tfstate" >> $GITHUB_ENV
-            echo "ENV=dev" >> $GITHUB_ENV
-          else
-            echo "environment not supported"
-            exit 1
-          fi
+      # - name: "Setting Environment"
+      #   env:
+      #     DEV: ${{ contains(github.event.inputs.infra_env, 'dev') }}
+      #   run: |
+      #     if ${DEV} == true; then
+      #       echo "ARM_CLIENT_ID=${{secrets.CEQ_AZURE_SANDBOX_TF_ARM_CLIENT_ID}}" >> $GITHUB_ENV
+      #       echo "ARM_CLIENT_SECRET=${{secrets.CEQ_AZURE_SANDBOX_TF_ARM_CLIENT_SECRET}}" >> $GITHUB_ENV
+      #       echo "ARM_SUBSCRIPTION_ID=${{secrets.CEQ_AZURE_SANDBOX_TF_ARM_SUBS_ID}}" >> $GITHUB_ENV
+      #       echo "ARM_TENANT_ID=${{secrets.CEQ_AZURE_SANDBOX_TF_ARM_TENANT_ID}}" >> $GITHUB_ENV
+      #       echo "TFSTATE_RG=cloudeq" >> $GITHUB_ENV
+      #       echo "TFSTATE_STORAGE_ACCOUNT=ceqstoragecd02" >> $GITHUB_ENV
+      #       echo "TFSTATE_CONTAINER=tfstate" >> $GITHUB_ENV
+      #       echo "ENV=dev" >> $GITHUB_ENV
+      #     else
+      #       echo "environment not supported"
+      #       exit 1
+      #     fi
 
-      # Checkout the repository to the GitHub Actions runner
-      - name: Login to azure
-        uses: azure/login@v1
-        with:
-          creds: '{"clientId":"${{ env.ARM_CLIENT_ID }}","clientSecret":"${{ env.ARM_CLIENT_SECRET }}","subscriptionId":"${{ env.ARM_SUBSCRIPTION_ID }}","tenantId":"${{ env.ARM_TENANT_ID }}"}'
-          enable-AzPSSession: true
+      # # Checkout the repository to the GitHub Actions runner
+      # - name: Login to azure
+      #   uses: azure/login@v1
+      #   with:
+      #     creds: '{"clientId":"${{ env.ARM_CLIENT_ID }}","clientSecret":"${{ env.ARM_CLIENT_SECRET }}","subscriptionId":"${{ env.ARM_SUBSCRIPTION_ID }}","tenantId":"${{ env.ARM_TENANT_ID }}"}'
+      #     enable-AzPSSession: true
 
-      - name: Download Azure Dependencies Modules
-        uses: azure/powershell@v1
-        with:
-          inlineScript: |
-            Install-Module -Name Az.Compute -Force -AllowClobber
-            Install-Module -Name Az.Storage -Force -AllowClobber
-            Install-Module -Name Az.Network -Force -AllowClobber 
-            Install-Module -Name Az.Resources -Force -AllowClobber
+      # - name: Download Azure Dependencies Modules
+      #   uses: azure/powershell@v1
+      #   with:
+      #     inlineScript: |
+      #       Install-Module -Name Az.Compute -Force -AllowClobber
+      #       Install-Module -Name Az.Storage -Force -AllowClobber
+      #       Install-Module -Name Az.Network -Force -AllowClobber 
+      #       Install-Module -Name Az.Resources -Force -AllowClobber
           
-          azPSVersion: "5.0.0"
+      #     azPSVersion: "5.0.0"
 
       - name: DNS Server Addition to VM
         uses: azure/powershell@v1
@@ -143,18 +143,23 @@ jobs:
             Write-output "$DNSServers"
             try {
               if(${VM} -eq $true){  
-                $vm = Get-AzVM -ResourceGroupName $RgName -Name $VMorVNetName
-                $nicID = $vm.NetworkProfile.NetworkInterfaces[0].Id
-                $nic = Get-AzNetworkInterface -ResourceId $nicID
-                $nic.DnsSettings.DnsServers = $DNSServers
-                $nic | Set-AzNetworkInterface
-                $nic.DnsSettings.DnsServers
-              } else {
-                $vnet = Get-AzVirtualNetwork -ResourceGroupName $RgName -Name $VMorVNetName
-                $vnet.DhcpOptions.DnsServers = $DNSServers
-                $vnet | Set-AzVirtualNetwork
-                $vnet.DhcpOptions.DnsServers
-              }
+                $DNSServers
+                $VM
+                $VNet
+                $VMorVNetName
+                # $vm = Get-AzVM -ResourceGroupName $RgName -Name $VMorVNetName
+                # $nicID = $vm.NetworkProfile.NetworkInterfaces[0].Id
+                # $nic = Get-AzNetworkInterface -ResourceId $nicID
+                # $nic.DnsSettings.DnsServers = $DNSServers
+                # $nic | Set-AzNetworkInterface
+                # $nic.DnsSettings.DnsServers
+              } 
+              # else {
+              #   $vnet = Get-AzVirtualNetwork -ResourceGroupName $RgName -Name $VMorVNetName
+              #   $vnet.DhcpOptions.DnsServers = $DNSServers
+              #   $vnet | Set-AzVirtualNetwork
+              #   $vnet.DhcpOptions.DnsServers
+              # }
             } catch {
               Write-Host "An error occurred: $($_.Exception.Message)"
             }
