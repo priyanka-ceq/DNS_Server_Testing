@@ -132,20 +132,20 @@ jobs:
         uses: azure/powershell@v1          
         with:
           inlineScript: |
-            $VM = ${{ contains(github.event.inputs.vm_or_vnet_choice, 'Virtual Machine') }}
-            $VNet = ${{ contains(github.event.inputs.vm_or_vnet_choice, 'Virtual Network') }}
+            $VM = "${{ contains(github.event.inputs.vm_or_vnet_choice, 'Virtual Machine') }}"
+            $VNet = "${{ contains(github.event.inputs.vm_or_vnet_choice, 'Virtual Network') }}"
             $RgName = "${{ github.event.inputs.resource_group_name }}"
             $DNSServers = "${{ github.event.inputs.dns_servers_ip }}"
             $VMorVNetName = "${{ github.event.inputs.vm_or_vnet_name }}"
             Write-output "$RgName"
             Write-output "$VMorVNetName"
             Write-output "$DNSServers"
-            $CharArray = $DNSServers.Split(",")
+            # $CharArray = $DNSServers.Split(",")
             # foreach ($dns_server in $CharArray)
             # {
             #   Write-Host $dns_server
             # }
-            # $CharArray = $DNSServers.Split(",")
+            $CharArray = $DNSServers.Split(",")
 
             foreach ($dns_server in $CharArray)
             {
@@ -154,19 +154,12 @@ jobs:
             }
             try {
               if(${VM} -eq $true){  
-                $DNSServers
-                $VM
-                $VNet
-                $VMorVNetName
-                $CharArray =$DNSServers.Split(", ")
-                $CharArray
-                foreach ($dns_server in $DNSServers)
-                {
-                  Write-Host $dns_server
-                }
+                $CharArray = $DNSServers.Split(",")
+                Write-Host "Inside Try-catch"
                 foreach ($dns_server in $CharArray)
                 {
-                  Write-Host $dns_server
+                    $dns_server = $dns_server.Trim(" ")
+                    Write-Host $dns_server
                 }
                 # $vm = Get-AzVM -ResourceGroupName $RgName -Name $VMorVNetName
                 # $nicID = $vm.NetworkProfile.NetworkInterfaces[0].Id
