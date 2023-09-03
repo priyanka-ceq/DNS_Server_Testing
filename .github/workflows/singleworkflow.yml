@@ -142,14 +142,14 @@ jobs:
             Write-output "$DNSServers"
             $CharArray = $DNSServers.Split(", ")
             #$CharArray
-            foreach ($dns_server in $DNSServers)
-            {
-              Write-Host $dns_server
-            }
-            # foreach ($dns_server in $CharArray)
+            # foreach ($dns_server in $DNSServers)
             # {
             #   Write-Host $dns_server
             # }
+            foreach ($dns_server in $CharArray)
+            {
+              Write-Host $dns_server
+            }
             try {
               if(${VM} -eq $true){  
                 $DNSServers
