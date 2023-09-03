@@ -140,12 +140,7 @@ jobs:
             Write-output "$RgName"
             Write-output "$VMorVNetName"
             Write-output "$DNSServers"
-            $CharArray = $DNSServers.Split(", ")
-            #$CharArray
-            # foreach ($dns_server in $DNSServers)
-            # {
-            #   Write-Host $dns_server
-            # }
+            $CharArray = $DNSServers.Split(",")
             foreach ($dns_server in $CharArray)
             {
               Write-Host $dns_server
