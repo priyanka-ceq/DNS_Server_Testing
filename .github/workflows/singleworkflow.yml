@@ -129,15 +129,14 @@ jobs:
       #     azPSVersion: "5.0.0"
 
       - name: DNS Server Addition to VM
-        uses: azure/powershell@v1
-        env:
-          VM: ${{ contains(github.event.inputs.vm_or_vnet_choice, 'Virtual Machine') }}
-          VNet: ${{ contains(github.event.inputs.vm_or_vnet_choice, 'Virtual Network') }}
-          RgName: ${{ github.event.inputs.resource_group_name }}
-          DNSServers: ${{ github.event.inputs.dns_servers_ip }}
-          VMorVNetName: ${{ github.event.inputs.vm_or_vnet_name }}
+        uses: azure/powershell@v1          
         with:
           inlineScript: |
+            $VM = ${{ contains(github.event.inputs.vm_or_vnet_choice, 'Virtual Machine') }}
+            $VNet = ${{ contains(github.event.inputs.vm_or_vnet_choice, 'Virtual Network') }}
+            $RgName = "${{ github.event.inputs.resource_group_name }}"
+            $DNSServers = "${{ github.event.inputs.dns_servers_ip }}"
+            $VMorVNetName = "${{ github.event.inputs.vm_or_vnet_name }}"
             Write-output "$RgName"
             Write-output "$VMorVNetName"
             Write-output "$DNSServers"
