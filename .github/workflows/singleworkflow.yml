@@ -140,10 +140,17 @@ jobs:
             Write-output "$RgName"
             Write-output "$VMorVNetName"
             Write-output "$DNSServers"
-            $CharArray = $DNSServers.Split(",")
+            $CharArray = $DNSServers.Split(",") -or 
             foreach ($dns_server in $CharArray)
             {
               Write-Host $dns_server
+            }
+            $CharArray = $DNSServers.Split(",")
+
+            foreach ($dns_server in $CharArray)
+            {
+                $dns_server = $dns_server.Trim(" ")
+                Write-Host $dns_server
             }
             try {
               if(${VM} -eq $true){  
