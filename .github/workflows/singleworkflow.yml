@@ -147,6 +147,8 @@ jobs:
                 $VM
                 $VNet
                 $VMorVNetName
+                $CharArray =$DNSServers.Split(", ")
+                $CharArray
                 # $vm = Get-AzVM -ResourceGroupName $RgName -Name $VMorVNetName
                 # $nicID = $vm.NetworkProfile.NetworkInterfaces[0].Id
                 # $nic = Get-AzNetworkInterface -ResourceId $nicID
